@@ -1,6 +1,5 @@
 #include "machine.h"
 #include "read.h"
-#include <fstream>
 
 float sigmoid(float x){
 	return 1/(1 + SDL_expf(-x));
@@ -13,14 +12,12 @@ float randomF(int fan_in){
 }
 
 std::string weightsFile = "784-128-128.bin";
-
 int inputSize = 784;
 int node0Size = 128;
 int node1Size = 128;
 int outputSize = 10;
 
 Matrix image(1, inputSize);
-
 Matrix weights0(inputSize, node0Size);
 Matrix weights1(node0Size, node1Size);
 Matrix weights2(node1Size, outputSize);
@@ -52,10 +49,6 @@ void initMachine(){
 	weights0.replace([](){ return randomF(inputSize); });
 	weights1.replace([](){ return randomF(node0Size); });
 	weights2.replace([](){ return randomF(outputSize); });
-
-	// bias0.replace(randomF);
-	// bias1.replace(randomF);
-	// bias2.replace(randomF);
 }
 
 Matrix forward(){
@@ -155,76 +148,75 @@ float train(int batchSize, float rate){
 		loss += cost(trainLabels[i]);
 		backward_Propagation(trainLabels[i]);
 
-		if( ! ((i + 1) % batchSize) ) 	
+		if( ! ((i + 1) % batchSize) ){
 			update_Parameters(rate);
+			saveWeights(weightsFile);
+		}
 	}
 	return loss/trainImages.size();
 }
 
-void classify(Matrix input){
+Matrix distribution_Data(Matrix input){
 	image = input;
 	forward();
-	
-	//Convert output to percentage.
+	return output;
+}
+
+int classify(Matrix input, bool silent){
+	image = input;
+	forward();
 	float sum = 0;
-	output.apply([](float x){return SDL_expf(x);});
-	output.pass([&sum](float x){ sum += x;});
-	output.apply([sum](float x){return x/sum * 100;});
-
+	if(!silent){
+		//Convert output to percentage.
+		output.apply([](float x){return SDL_expf(x);});
+		output.pass([&sum](float x){ sum += x;});
+		output.apply([sum](float x){return x/sum * 100;});
+	}
 	int chosen = 0;
-	float percentage = 0;
+	float value = 0;
 	for(int i = 0; i < outputSize; i++){
-		std::cout << i << ":\t" << output[0][i] << "%\n";
-
-		if(output[0][i] > percentage){
-			percentage = output[0][i];
+		if(!silent)
+			SDL_Log("%i:\t%f",i, output[0][i]);
+		if(output[0][i] >= value){
+			value = output[0][i];
 			chosen = i;
 		}
-		std::cout << "\n";
 	}
-	std::cout << "Guess = " << chosen;
-	std::cout << "\n\n";
+
+	if(!silent)
+		SDL_Log("Chose %i\n\n\n", chosen);
+	return chosen;
 }
 
-void saveWeights(const std::string& path) {
-    std::ofstream file(path, std::ios::binary);
-    if (!file.is_open())
-        throw std::runtime_error("Cannot open file for saving: " + path);
-
-    auto writeMatrix = [&](Matrix& m) {
-        for (int i = 0; i < m.rows; i++)
-            for (int j = 0; j < m.columns; j++)
-                file.write((char*)&m[i][j], sizeof(float));
-    };
-
-    writeMatrix(weights0); writeMatrix(bias0);
-    writeMatrix(weights1); writeMatrix(bias1);
-    writeMatrix(weights2); writeMatrix(bias2);
-}
-
-
-void loadWeights(const std::string& path) {
-    std::ifstream file(path, std::ios::binary);
-    if (!file.is_open())
-        throw std::runtime_error("Cannot open file for loading: " + path);
-
-    auto readMatrix = [&](Matrix& m) {
-        for (int i = 0; i < m.rows; i++)
-            for (int j = 0; j < m.columns; j++)
-                file.read((char*)&m[i][j], sizeof(float));
-    };
-
-    readMatrix(weights0); readMatrix(bias0);
-    readMatrix(weights1); readMatrix(bias1);
-    readMatrix(weights2); readMatrix(bias2);
-}
 
 void trainer(void){
-		SDL_Log("Training has started!\nPlease wait");
+	SDL_Log("Training has started!\nPlease wait");
 		Uint32 before = SDL_GetTicks();
 		float average_loss = train();
 		Uint32 after = SDL_GetTicks();
 		int time = (after - before)/1000;
-		SDL_Log("Training complete :\n\tTime taken = %i secs \n\tLoss %f", time, average_loss);
-		saveWeights(weightsFile);
+		SDL_Log("Training complete :\n\tTime taken = %i secs \n\tLoss %f\n\n", time, average_loss);
+}
+
+auto testImages = loadImages("../assets/Testing/images.idx3-ubyte"); 
+auto testLabels = loadLabels("../assets/Testing/labels.idx1-ubyte");
+float test(bool testing, bool silent){
+	auto& images = testing ? testImages:trainImages;
+	auto& labels = testing ? testLabels:trainLabels;
+
+	float success = 0;
+	float totalLoss = 0;
+	for(int i = 0; i < images.size(); i++){
+		int chosen = classify(images[i], true);	
+		if( chosen == labels[i] )
+			success+=1;
+		totalLoss += cost(labels[i]);
+	}
+	
+	success/=images.size();
+	success*=100;
+	totalLoss/=images.size();
+	if(!silent)
+		SDL_Log("Testing complete:\n\tSuccess rate = %.2f%%\n\tMse Loss = %.7f",success,totalLoss);
+	return success;
 }

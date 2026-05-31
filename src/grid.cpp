@@ -41,7 +41,7 @@ void Grid::draw(SDL_FPoint mouse_position, bool state, int brush_radius){
 
 			if (state){
 				float before = colour;
-				colour = std::min(colour + 50.0f/255.0f * power, 1.0f);
+				colour = std::min(colour + 80.0f/255.0f * power, 1.0f);
 			}
 			else
 				colour = std::max(colour - 50.0f/255.0f * power, 0.0f);

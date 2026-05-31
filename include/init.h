@@ -15,12 +15,12 @@ extern bool RUNNING;
 typedef struct Display{
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
-	SDL_Point size = {800,800};
+	SDL_Point size = {1600, 1200};
 	const char* title = "Scribble";
 }Display;
 
 void destroy_Display(Display& display);
-void update(Input& inputs, Grid& grid);
-void init(Display& screen);
+void update(Input& inputs, Grid& grid, Grid& distribution);
+void init(Display& screen, Grid& grid, Grid& distribution);
 void quit(Display& screen);
-void render(Display& screen, Grid& grid);
+

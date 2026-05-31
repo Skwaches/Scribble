@@ -18,12 +18,15 @@ endif()
 
 set(executable_Name ${PROJECT_NAME})
 add_executable(${executable_Name} 
-	src/window.cpp
-	src/input.cpp
-	src/matrix.cpp
 	src/grid.cpp
+	src/init.cpp
+	src/input.cpp
 	src/machine.cpp
+	src/matrix.cpp
 	src/read.cpp
+	src/render.cpp
+	src/window.cpp
+
 )
 
 target_include_directories(${executable_Name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

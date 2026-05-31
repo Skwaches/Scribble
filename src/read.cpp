@@ -1,6 +1,8 @@
 #include "read.h"
 #include <stdexcept>
 #include <fstream>
+#include "machine.h"
+
 // IDX files are big-endian, most PCs are little-endian — must reverse bytes
 int reverseInt(int i) {
     unsigned char c1, c2, c3, c4;
@@ -56,8 +58,41 @@ std::vector<int> loadLabels(const std::string& path) {
     std::vector<int> labels(numLabels);
     for (int i = 0; i < numLabels; i++) {
         unsigned char label;
-        file.read((char*)&label, 1);
+		file.read((char*)&label, 1);
         labels[i] = (int)label;
     }
     return labels;
+}
+
+void saveWeights(const std::string& path) {
+    std::ofstream file(path, std::ios::binary);
+    if (!file.is_open())
+        throw std::runtime_error("Cannot open file for saving: " + path);
+
+    auto writeMatrix = [&](Matrix& m) {
+        for (int i = 0; i < m.rows; i++)
+            for (int j = 0; j < m.columns; j++)
+                file.write((char*)&m[i][j], sizeof(float));
+    };
+
+    writeMatrix(weights0); writeMatrix(bias0);
+    writeMatrix(weights1); writeMatrix(bias1);
+    writeMatrix(weights2); writeMatrix(bias2);
+}
+
+
+void loadWeights(const std::string& path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open())
+        throw std::runtime_error("Cannot open file for loading: " + path);
+
+    auto readMatrix = [&](Matrix& m) {
+        for (int i = 0; i < m.rows; i++)
+            for (int j = 0; j < m.columns; j++)
+                file.read((char*)&m[i][j], sizeof(float));
+    };
+
+    readMatrix(weights0); readMatrix(bias0);
+    readMatrix(weights1); readMatrix(bias1);
+    readMatrix(weights2); readMatrix(bias2);
 }
