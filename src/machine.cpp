@@ -150,7 +150,7 @@ float train(int batchSize, float rate){
 
 		if( ! ((i + 1) % batchSize) ){
 			update_Parameters(rate);
-			saveWeights(weightsFile);
+			saveParameters(weightsFile);
 		}
 	}
 	return loss/trainImages.size();
@@ -168,7 +168,6 @@ int classify(Matrix input, bool silent){
 	float sum = 0;
 	if(!silent){
 		//Convert output to percentage.
-		output.apply([](float x){return SDL_expf(x);});
 		output.pass([&sum](float x){ sum += x;});
 		output.apply([sum](float x){return x/sum * 100;});
 	}

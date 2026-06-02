@@ -12,6 +12,7 @@ option(VENDORED "Use personal libraries" ON)
 #Dependencies
 if(VENDORED)
 	add_subdirectory(${VENDOR_DIR}/SDL SDL)
+	add_subdirectory(${VENDOR_DIR}/SDL_ttf SDL_ttf)
 else()
 	find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
 endif()
@@ -30,4 +31,4 @@ add_executable(${executable_Name}
 )
 
 target_include_directories(${executable_Name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(${executable_Name} PRIVATE SDL3::SDL3) 
+target_link_libraries(${executable_Name} PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3) 

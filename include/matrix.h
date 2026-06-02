@@ -21,6 +21,7 @@ class Matrix {
 		Matrix operator-(const Matrix other) const;
 		std::vector<float>& operator[](int i);
 		Matrix transpose();
+		Matrix centerByMass();
 		
 		//Pass all the elements through a function and assign the element the output.
 		void apply(std::function<float(float)> func);

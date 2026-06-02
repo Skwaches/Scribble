@@ -7,19 +7,18 @@ void  destroy_Display(Display& display){
 	SDL_DestroyWindow(display.window);
 	SDL_DestroyRenderer(display.renderer);
 }
-
 void update(Input& inputs, Grid& grid, Grid& distribution){
 	//Scribbling
 	bool scribble = true;
 	if( inputs.left_mouse.held && inputs.mouse_motion ){
 		SDL_FPoint mouse_position;
 		SDL_GetMouseState(&mouse_position.x, &mouse_position.y);
-		grid.draw(mouse_position, true, 2);
+		grid.draw(mouse_position, true, 3);
 	}
 	else if(inputs.right_mouse.held && inputs.mouse_motion){
 		SDL_FPoint mouse_position;
-		SDL_GetMouseState(&mouse_position.x, &mouse_position.y);
-		grid.draw(mouse_position, false, 2);
+		SDL_GetMouseState(&mouse_position.x, &mouse_position.y); 
+		grid.draw(mouse_position, false, 5);
 	}
 	//Clearing screen
 	else if(inputs.c.click)
@@ -33,12 +32,12 @@ void update(Input& inputs, Grid& grid, Grid& distribution){
 
 	//Change has occured! update the distribution!
 	if(scribble){
-		distribution.intensity = distribution_Data(grid.intensity);
+		distribution.intensity = distribution_Data(grid.intensity.centerByMass());
 	}
 	
 	//Guess number
 	if(inputs.enter.click)
-		classify(grid.intensity);
+		classify(grid.intensity.centerByMass());
 
 	//Train model.
 	if(inputs.t.click)
@@ -67,3 +66,4 @@ void quit(Display& screen){
 	destroy_Display(screen);
 	SDL_Quit();
 }
+

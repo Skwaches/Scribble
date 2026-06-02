@@ -110,3 +110,40 @@ Matrix Matrix::modify(std::function<float(float)> func){
 	return copy;
 }
 
+#include <SDL3/SDL.h>
+Matrix Matrix::centerByMass() {
+    float totalMass = 0, cx = 0, cy = 0;
+
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < rows; col++) {
+            float val = elements[0][row * rows + col];
+            totalMass += val;
+            cx += col * val;
+            cy += row * val;
+        }
+    }
+
+    if (totalMass == 0) return *this;
+
+    cx /= totalMass;
+    cy /= totalMass;
+
+    float centerX = (rows  - 1) / 2.0f;
+    float centerY = (rows - 1) / 2.0f;
+
+    int dx = (int)SDL_roundf(centerX - cx);
+    int dy = (int)SDL_roundf(centerY - cy);
+
+
+
+    Matrix shifted(1, rows * rows);
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < rows; col++) {
+            int srcRow = row - dy;
+            int srcCol = col - dx;
+            if (srcRow >= 0 && srcRow < rows && srcCol >= 0 && srcCol < rows)
+                shifted[0][row * rows + col] = elements[0][srcRow * rows + srcCol];
+        }
+    }
+    return shifted;
+}

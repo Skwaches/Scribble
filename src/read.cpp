@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <fstream>
 #include "machine.h"
+#include <SDL3_ttf/SDL_ttf.h>
 
 // IDX files are big-endian, most PCs are little-endian — must reverse bytes
 int reverseInt(int i) {
@@ -64,7 +65,7 @@ std::vector<int> loadLabels(const std::string& path) {
     return labels;
 }
 
-void saveWeights(const std::string& path) {
+void saveParameters(const std::string& path) {
     std::ofstream file(path, std::ios::binary);
     if (!file.is_open())
         throw std::runtime_error("Cannot open file for saving: " + path);

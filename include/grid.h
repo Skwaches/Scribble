@@ -12,7 +12,7 @@ class Grid{
 		Matrix intensity;
 		Grid(
 			SDL_FPoint position = {0.0,0.0}, SDL_FPoint size = {1200, 1200}, 
-			SDL_Point dimensions = {28, 28}, SDL_FPoint spacing = {1,1}); 
+			SDL_Point dimensions = {28, 28}, SDL_FPoint spacing = {10,10}); 
 		void render(SDL_Renderer* renderer);
 		void draw(SDL_FPoint mouse_position, bool state, int brush_radius);
 		void clear(bool state);

@@ -6,10 +6,14 @@ Grid::Grid( SDL_FPoint position, SDL_FPoint size, SDL_Point dimensions, SDL_FPoi
 	intensity(1, dimensions.x * dimensions.y),
 	rects(dimensions.x, std::vector<SDL_FRect>(dimensions.y, {0,0,0,0}) ),
 	cell( {size.x/dimensions.x, size.y/dimensions.y} ){
+
 	SDL_FPoint spaced_Size = { cell.x - spacing.x, cell.y - spacing.y};
 	for(int i = 0; i < dimensions.x; i++)
 		for(int j = 0; j < dimensions.y; j++){
-			rects[i][j] = { position.x + cell.x * i - spacing.x, position.y + cell.y * j - spacing.y, spaced_Size.x, spaced_Size.y };
+			rects[i][j] = { 
+				position.x + spacing.x/2.0f + cell.x * i,
+				position.y + spacing.y/2.0f + cell.y * j,
+				spaced_Size.x, spaced_Size.y };
 		}
 }
 
@@ -32,19 +36,20 @@ void Grid::draw(SDL_FPoint mouse_position, bool state, int brush_radius){
 
 	for (int i = index.x - brush_radius; i <= index.x + brush_radius; i++) {
 		for (int j = index.y - brush_radius; j <= index.y + brush_radius; j++) {
-			if (i < 0 || i >= dimensions.x || j < 0 || j >= dimensions.y) continue;
+			if (i < 0 || i >= dimensions.x  || j < 0 || j >= dimensions.y) continue;
+
 			float distance = SDL_sqrt(SDL_pow(index.x - i, 2) + SDL_pow(index.y - j, 2));
 			if (distance >= brush_radius) continue;
 
-			float power = 1.0f - distance / brush_radius;
+			float power = SDL_pow(1.0f - distance / brush_radius, 3);
 			float& colour = intensity[0][j * dimensions.x + i];
 
 			if (state){
 				float before = colour;
-				colour = std::min(colour + 80.0f/255.0f * power, 1.0f);
+				colour = std::min(colour + 50.0f/255.0f * power, 1.0f);
 			}
 			else
-				colour = std::max(colour - 50.0f/255.0f * power, 0.0f);
+				colour = std::max(colour - 80.0f/255.0f * power, 0.0f);
 		}
 	}
 }
